@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<!-- Created By CodingLab - www.codinglabweb.com -->
-<html lang="en" dir="ltr">
-  <head>
+{% extends 'leitnex/navigationbar.html' %}
+
+
+{% block head %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Login Form | CodingLab</title> 
@@ -117,10 +117,11 @@ form .signup-link a:hover{
   text-decoration: underline;
 }
     </style>
-  </head>
-  <body>
+{% endblock %}
+
+{% block body %}
     <div class="container">
-      <div class="wrapper">
+    <div class="wrapper">
         <div class="title"><span>Login</span></div>
         <form method="post" action="{% url 'accounts_web:login' %}">
             {% csrf_token %}
@@ -139,8 +140,6 @@ form .signup-link a:hover{
             </div>
             <div class="signup-link">Not a member? <a href="{% url 'accounts_web:register' %}">Signup now</a></div>
         </form>
-      </div>
     </div>
-
-  </body>
-</html>
+    </div>
+{% endblock %}
