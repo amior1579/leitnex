@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from accounts.models import User
+from cards.models import Category
 from django.http import HttpResponse, HttpResponseRedirect
 
 
@@ -49,4 +50,9 @@ def user_profile(request):
 
 
 def user_cards(request):
-    return render(request, 'registration/cards.html')
+    auth_user = request.user
+    q_Category = Category.objects.filter(user=auth_user)
+    print(q_Category)
+    return render(request, 'registration/cards.html',{
+        'categorys': q_Category,
+    })

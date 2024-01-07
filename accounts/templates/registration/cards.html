@@ -1,8 +1,31 @@
 {% extends 'registration/profile.html' %}
 
+{% block head %}
+<title>Cards</title>
+<style>
+.glassbox {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 20px 0 20px;
+  margin: 20px;
+  background: inherit;
+  box-shadow: 0px 0px 1rem 0 rgb(0,0,0,0.2);
+  border-radius: 10px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  text-align: center;
+}
+</style>
+{% endblock %}
+
 {% block body %}
     <div>
         <h1>all cards</h1>
 
+        {% for Category in categorys %}
+            <div class="glassbox" id="{{Category.id}}">
+                <h3>{{Category.name}}</h3>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}
