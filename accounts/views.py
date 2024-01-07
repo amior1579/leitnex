@@ -42,3 +42,11 @@ def user_login(request):
 
     else:
         return render(request, 'registration/login.html')
+    
+
+def user_profile(request):
+    return render(request, 'registration/profile.html')
+
+
+def user_cards(request):
+    return render(request, 'registration/cards.html')

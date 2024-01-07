@@ -313,12 +313,10 @@ nav .navbar .links li .sub-menu li{
     </style>
     {% block head %}
     {% endblock %}
-    <title> Responsive Drop Down Navigation Menu | Leitnex </title>
 
    </head>
 <body>
   <div>
-
     <nav>
       <div class="navbar">
         <i class='bx bx-menu'></i>
@@ -330,7 +328,7 @@ nav .navbar .links li .sub-menu li{
           </div>
           <ul class="links">
             <li><a href="{% url 'home' %}">HOME</a></li>
-            <li><a href="#">PROFILE</a></li>
+            <li><a href="{% url 'accounts_web:profile' %}">PROFILE</a></li>
             <li><a href="#">MY CARDS</a></li>
             <li><a href="#">CONTACT US</a></li>
             <li><a href="{% url 'accounts_web:login' %}">LOGIN</a></li>
