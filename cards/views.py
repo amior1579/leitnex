@@ -52,7 +52,7 @@ def get_or_create_card(request):
     
 
     # if request.method == 'POST':
-    #     serializer = CategorySerializer(data=request.data)
+    #     serializer = CardSerializer(data=request.data)
     #     if serializer.is_valid():
     #         serializer.validated_data['user'] = auth_user
     #         serializer.save()
