@@ -15,6 +15,26 @@
   border: 1px solid rgb(255 255 255 / 15%);
   text-align: center;
 }
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    height: 50%;
+    width: 70%;
+    background-color: rgba(93, 93, 93, 0.8);
+    color: white;
+    z-index: 1;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
 </style>
 {% endblock %}
 
@@ -23,9 +43,27 @@
         <h1>all cards</h1>
 
         {% for Category in categorys %}
-            <div class="glassbox" id="{{Category.id}}">
-                <h3>{{Category.name}}</h3>
+            <div class="glassbox" id="{{Category.id}}"  onclick="openModal('{{Category.category_name}}')">
+                <h3>{{Category.category_name}}</h3>
             </div>
-        {% endfor %}
+            {% endfor %}
+            <div id="myModal" class="modal">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="modalContent"></div>
+            </div>
     </div>
+    <script>
+        function openModal(categoryName) {
+            var modal = document.getElementById('myModal');
+            var modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = '<h2>' + categoryName + '</h2>';
+            modal.style.display = 'block';
+        }
+    
+        function closeModal() {
+            var modal = document.getElementById('myModal');
+    
+            modal.style.display = 'none';
+        }
+    </script>
 {% endblock %}
