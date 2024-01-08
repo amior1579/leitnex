@@ -52,10 +52,10 @@ def get_or_create_card(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-    # if request.method == 'POST':
-    #     serializer = CardSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.validated_data['user'] = auth_user
-    #         serializer.save()
-    #         return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        serializer = CardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.validated_data['choice_user'] = auth_user
+            serializer.save()
+            return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
