@@ -40,7 +40,8 @@ def get_or_create_card(request):
         category_name = request.GET.get('category_name')
         get_category = get_object_or_404(
             Category, 
-            category_name=category_name
+            user = auth_user,
+            category_name = category_name
             )
         q_Category = Card.objects.filter(
             choice_category = get_category,
