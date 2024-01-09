@@ -120,6 +120,7 @@
                     <input type="text" placeholder="question" name="card_question" id="updatequestioncardinput">
                     <input type="text" placeholder="answer" name="card_answer" id="updateanswercardinput">
                     <input type="submit" id="updatecardsubmit" onclick="updatecardsubmit()">
+                    <h3 id="message"></h3>
                 </div>
             </div>
     </div>
@@ -174,7 +175,7 @@
                         spanElement.className = cards.id;
                         spanElement.textContent = cards.question;
                         spanElement.onclick = function () {
-                            openCardDetail(cards.id, categoryID); // تابع جدید برای نمایش جزئیات کارت
+                            openCardDetail(cards.id, categoryID, categoryName); // تابع جدید برای نمایش جزئیات کارت
                         };
                         modalContent.appendChild(spanElement);
                     })
@@ -185,13 +186,15 @@
         }
 
         // open card - show card detail
-        function openCardDetail(cardID, categoryID) {
+        function openCardDetail(cardID, categoryID, categoryName) {
             var updatecardForm = document.getElementById('updatecardForm');
             var updatequestioncardinput = document.getElementById('updatequestioncardinput')
             var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
             updatequestioncardinput.className =  categoryID
             updateanswercardinput.className =  cardID
-            
+            message.className = categoryName
+
             fetch('http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=' + categoryID + '&cardID=' + cardID)
             .then(response => response.json())
             .then(data => {
@@ -202,9 +205,13 @@
             updatecardForm.style.display = 'block';
         }
 
+        // Update card
         function updatecardsubmit(){
+            var updatecardForm = document.getElementById('updatecardForm')
             var updatequestioncardinput = document.getElementById('updatequestioncardinput')
             var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
+
             var categoryID = updatequestioncardinput.className
             var cardID = updateanswercardinput.className
 
@@ -227,9 +234,14 @@
             })
             .then(data => {
                 console.log('Card updated successfully:', data);
+                message.innerHTML = 'Card updated successfully';
+
+                // openModal(message.className, data.choice_category)
+
             })
             .catch(error => {
                 console.error('Error updating card:', error);
+                message.innerHTML = 'Error updating card';
             });
         }
 
@@ -246,6 +258,7 @@
             var questioncardinput = document.getElementById('questioncardinput').value;
             var answercardinput = document.getElementById('answercardinput').value;
             var modalContent = document.getElementById('modalContent').className;
+
             console.log(modalContent);
             fetch('http://127.0.0.1:8000/cards/getOrCreate_card/', {
                 method: 'POST',
@@ -280,10 +293,14 @@
         function closechildModal() {
             var createcardForm = document.getElementById('createcardForm');
             var updatecardForm = document.getElementById('updatecardForm');
+            var message = document.getElementById('message')
+
 
             createcardForm.style.display = 'none';
             updatecardForm.style.display = 'none';
+            message.innerHTML = null;
         }
+
 
 
         function getCookie(name) {
