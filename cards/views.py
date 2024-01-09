@@ -66,9 +66,11 @@ def get_or_create_card(request):
 @permission_classes([IsAuthenticated])
 def get_or_update_detail_card(request):
     auth_user = request.user
+    categoryID = request.GET.get('categoryID')
+    cardID = request.GET.get('cardID')
+    Q_card = get_object_or_404(Card, id=cardID, choice_category=categoryID, choice_user=auth_user)
+
     if request.method == 'GET':
-        categoryID = request.GET.get('categoryID')
-        cardID = request.GET.get('cardID')
         # print(categoryID)
         # print(cardID)
         q_card = Card.objects.filter(
@@ -80,10 +82,9 @@ def get_or_update_detail_card(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-    # if request.method == 'PUT':
-    #     serializer = CardSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.validated_data['choice_user'] = auth_user
-    #         serializer.save()
-    #         return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'PUT':
+        serializer = CardSerializer(instance=Q_card, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

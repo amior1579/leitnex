@@ -60,7 +60,7 @@
     padding: 10px;
 
 }
-#createcardForm{
+#createcardForm, #updatecardForm{
     display: none;
     position: fixed;
     top: 50%;
@@ -106,12 +106,20 @@
                 <span class="create_card" onclick="openCreatecardForm()">+</span>
                 <div id="modalContent" class=""></div>
 
-                <!-- create cards-->
+                <!-- create card-->
                 <div id="createcardForm">
                     <span class="close" onclick="closechildModal()">&times;</span>
                     <input type="text" placeholder="question" name="card_question" id="questioncardinput">
                     <input type="text" placeholder="answer" name="card_answer" id="answercardinput">
                     <input type="submit" id="createcardsubmit" onclick="createcardsubmit()">
+                </div>
+
+                <!-- Update card-->
+                <div id="updatecardForm">
+                    <span class="close" onclick="closechildModal()">&times;</span>
+                    <input type="text" placeholder="question" name="card_question" id="updatequestioncardinput">
+                    <input type="text" placeholder="answer" name="card_answer" id="updateanswercardinput">
+                    <input type="submit" id="updatecardsubmit" onclick="updatecardsubmit()">
                 </div>
             </div>
     </div>
@@ -178,18 +186,51 @@
 
         // open card - show card detail
         function openCardDetail(cardID, categoryID) {
-            var createcardForm = document.getElementById('createcardForm');
-            var questioncardinput = document.getElementById('questioncardinput')
-            var answercardinput = document.getElementById('answercardinput')
+            var updatecardForm = document.getElementById('updatecardForm');
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            updatequestioncardinput.className =  categoryID
+            updateanswercardinput.className =  cardID
             
             fetch('http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=' + categoryID + '&cardID=' + cardID)
             .then(response => response.json())
             .then(data => {
                 console.log(data[0]);
-                questioncardinput.value = data[0].question
-                answercardinput.value = data[0].answer
+                updatequestioncardinput.value = data[0].question
+                updateanswercardinput.value = data[0].answer
             })
-            createcardForm.style.display = 'block';
+            updatecardForm.style.display = 'block';
+        }
+
+        function updatecardsubmit(){
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var categoryID = updatequestioncardinput.className
+            var cardID = updateanswercardinput.className
+
+            fetch(`http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=${categoryID}&cardID=${cardID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), // اگر از CSRF استفاده می‌کنید
+                },
+                body: JSON.stringify({
+                    question: updatequestioncardinput.value,
+                    answer : updateanswercardinput.value,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Card updated successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error updating card:', error);
+            });
         }
 
         // Open create card form
@@ -238,8 +279,10 @@
         }
         function closechildModal() {
             var createcardForm = document.getElementById('createcardForm');
+            var updatecardForm = document.getElementById('updatecardForm');
 
             createcardForm.style.display = 'none';
+            updatecardForm.style.display = 'none';
         }
 
 
