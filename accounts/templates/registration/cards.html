@@ -161,15 +161,36 @@
                 .then(response => response.json())
                 .then(data => {
                     // console.log(data);
-                    data.forEach(cards =>{
-                        // console.log(cards);
-                        modalContent.innerHTML += '<span>' + cards.question + '</span>';
+                    data.forEach(cards => {
+                        var spanElement = document.createElement('span');
+                        spanElement.className = cards.id;
+                        spanElement.textContent = cards.question;
+                        spanElement.onclick = function () {
+                            openCardDetail(cards.id, categoryID); // تابع جدید برای نمایش جزئیات کارت
+                        };
+                        modalContent.appendChild(spanElement);
                     })
                 })
+
             modal.style.display = 'block';
 
         }
 
+        // open card - show card detail
+        function openCardDetail(cardID, categoryID) {
+            var createcardForm = document.getElementById('createcardForm');
+            var questioncardinput = document.getElementById('questioncardinput')
+            var answercardinput = document.getElementById('answercardinput')
+            
+            fetch('http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=' + categoryID + '&cardID=' + cardID)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data[0]);
+                questioncardinput.value = data[0].question
+                answercardinput.value = data[0].answer
+            })
+            createcardForm.style.display = 'block';
+        }
 
         // Open create card form
         function openCreatecardForm(){
@@ -206,7 +227,7 @@
             });
             location.reload();
         }
-
+        
     
         function closeModal() {
             var modal = document.getElementById('myModal');
