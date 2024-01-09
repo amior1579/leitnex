@@ -18,7 +18,7 @@ class Card(models.Model):
 
 
     def __str__(self):
-        return f'{self.question}'
+        return f'{self.id},{self.question}'
     
     @classmethod
     def get_cards_by_category_name(cls, category_name, user):

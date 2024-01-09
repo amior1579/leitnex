@@ -60,7 +60,7 @@
     padding: 10px;
 
 }
-#createcardForm{
+#createcardForm, #updatecardForm{
     display: none;
     position: fixed;
     top: 50%;
@@ -106,12 +106,21 @@
                 <span class="create_card" onclick="openCreatecardForm()">+</span>
                 <div id="modalContent" class=""></div>
 
-                <!-- create cards-->
+                <!-- create card-->
                 <div id="createcardForm">
                     <span class="close" onclick="closechildModal()">&times;</span>
                     <input type="text" placeholder="question" name="card_question" id="questioncardinput">
                     <input type="text" placeholder="answer" name="card_answer" id="answercardinput">
                     <input type="submit" id="createcardsubmit" onclick="createcardsubmit()">
+                </div>
+
+                <!-- Update card-->
+                <div id="updatecardForm">
+                    <span class="close" onclick="closechildModal()">&times;</span>
+                    <input type="text" placeholder="question" name="card_question" id="updatequestioncardinput">
+                    <input type="text" placeholder="answer" name="card_answer" id="updateanswercardinput">
+                    <input type="submit" id="updatecardsubmit" onclick="updatecardsubmit()">
+                    <h3 id="message"></h3>
                 </div>
             </div>
     </div>
@@ -161,15 +170,80 @@
                 .then(response => response.json())
                 .then(data => {
                     // console.log(data);
-                    data.forEach(cards =>{
-                        // console.log(cards);
-                        modalContent.innerHTML += '<span>' + cards.question + '</span>';
+                    data.forEach(cards => {
+                        var spanElement = document.createElement('span');
+                        spanElement.className = cards.id;
+                        spanElement.textContent = cards.question;
+                        spanElement.onclick = function () {
+                            openCardDetail(cards.id, categoryID, categoryName); // تابع جدید برای نمایش جزئیات کارت
+                        };
+                        modalContent.appendChild(spanElement);
                     })
                 })
+
             modal.style.display = 'block';
 
         }
 
+        // open card - show card detail
+        function openCardDetail(cardID, categoryID, categoryName) {
+            var updatecardForm = document.getElementById('updatecardForm');
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
+            updatequestioncardinput.className =  categoryID
+            updateanswercardinput.className =  cardID
+            message.className = categoryName
+
+            fetch('http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=' + categoryID + '&cardID=' + cardID)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data[0]);
+                updatequestioncardinput.value = data[0].question
+                updateanswercardinput.value = data[0].answer
+            })
+            updatecardForm.style.display = 'block';
+        }
+
+        // Update card
+        function updatecardsubmit(){
+            var updatecardForm = document.getElementById('updatecardForm')
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
+
+            var categoryID = updatequestioncardinput.className
+            var cardID = updateanswercardinput.className
+
+            fetch(`http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=${categoryID}&cardID=${cardID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), // اگر از CSRF استفاده می‌کنید
+                },
+                body: JSON.stringify({
+                    question: updatequestioncardinput.value,
+                    answer : updateanswercardinput.value,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Card updated successfully:', data);
+                message.innerHTML = 'Card updated successfully';
+
+                // openModal(message.className, data.choice_category)
+
+            })
+            .catch(error => {
+                console.error('Error updating card:', error);
+                message.innerHTML = 'Error updating card';
+            });
+        }
 
         // Open create card form
         function openCreatecardForm(){
@@ -184,6 +258,7 @@
             var questioncardinput = document.getElementById('questioncardinput').value;
             var answercardinput = document.getElementById('answercardinput').value;
             var modalContent = document.getElementById('modalContent').className;
+
             console.log(modalContent);
             fetch('http://127.0.0.1:8000/cards/getOrCreate_card/', {
                 method: 'POST',
@@ -206,7 +281,7 @@
             });
             location.reload();
         }
-
+        
     
         function closeModal() {
             var modal = document.getElementById('myModal');
@@ -217,9 +292,15 @@
         }
         function closechildModal() {
             var createcardForm = document.getElementById('createcardForm');
+            var updatecardForm = document.getElementById('updatecardForm');
+            var message = document.getElementById('message')
+
 
             createcardForm.style.display = 'none';
+            updatecardForm.style.display = 'none';
+            message.innerHTML = null;
         }
+
 
 
         function getCookie(name) {
