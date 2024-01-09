@@ -1,0 +1,321 @@
+{% extends 'registration/profile.html' %}
+
+{% block head %}
+<title>Cards</title>
+<style>
+.glassbox {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 20px 0 20px;
+  margin: 20px;
+  background: inherit;
+  box-shadow: 0px 0px 1rem 0 rgb(0,0,0,0.2);
+  border-radius: 10px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  text-align: center;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    height: 50%;
+    width: 70%;
+    background-color: rgba(93, 93, 93, 0.8);
+    color: white;
+    z-index: 1;
+}
+#openCreateCategorydiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    height: 50%;
+    width: 70%;
+    background-color: rgba(93, 93, 93, 0.8);
+    color: white;
+    z-index: 1;
+}
+
+#modalContent span{
+    border: 1px solid white;
+    padding: 10px 30px 10px;
+    /* display: inline; */
+    margin: 5px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+.create_gategory, .create_card{
+    border: solid 1px black;
+    padding: 10px;
+
+}
+#createcardForm, #updatecardForm{
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    height: 50%;
+    width: 70%;
+    background-color: rgba(242, 242, 242, 0.8);
+    color: rgb(73, 91, 47);
+    z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+    <div>
+        <h1>all Boxes</h1>
+        <span class="create_gategory" onclick="openCreateCategoryForm()">+</span>
+        
+
+        {% for box in Boxes %}
+            <div class="glassbox" id="{{box.id}}"  onclick="openModal('{{box.box_name}}','{{box.id}}')">
+                <h3>{{box.box_name}}</h3>
+            </div>
+        {% endfor %}
+            
+        <!-- Show category -->
+            <div id="openCreateCategorydiv" class="">
+                <span class="close" onclick="closeModal()">&times;</span>
+
+                 <!-- Create category -->
+                <div id="createCategoryForm">
+                    <input type="text" placeholder="box_name" name="box_name" id="createCategorinput">
+                    <input type="submit" id="createCategorysubmit" onclick="createCategorysubmit()">
+                </div>
+
+            </div>
+
+        <!-- Show cards -->
+            <div id="myModal" class="modal">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <span class="create_card" onclick="openCreatecardForm()">+</span>
+                <div id="modalContent" class=""></div>
+
+                <!-- create card-->
+                <div id="createcardForm">
+                    <span class="close" onclick="closechildModal()">&times;</span>
+                    <input type="text" placeholder="question" name="card_question" id="questioncardinput">
+                    <input type="text" placeholder="answer" name="card_answer" id="answercardinput">
+                    <input type="submit" id="createcardsubmit" onclick="createcardsubmit()">
+                </div>
+
+                <!-- Update card-->
+                <div id="updatecardForm">
+                    <span class="close" onclick="closechildModal()">&times;</span>
+                    <input type="text" placeholder="question" name="card_question" id="updatequestioncardinput">
+                    <input type="text" placeholder="answer" name="card_answer" id="updateanswercardinput">
+                    <input type="submit" id="updatecardsubmit" onclick="updatecardsubmit()">
+                    <h3 id="message"></h3>
+                </div>
+            </div>
+    </div>
+    <script>
+
+        // open to show category
+        function openCreateCategoryForm(){
+            var openCreateCategorydiv = document.getElementById('openCreateCategorydiv');
+            var modalContent = document.getElementById('createCategoryForm');
+
+            openCreateCategorydiv.style.display = 'block';
+
+        }
+
+        // Create category
+        function createCategorysubmit(){
+            var boxName = document.getElementById('createCategorinput').value;
+            console.log(boxName);
+            fetch('http://127.0.0.1:8000/boxes/getOrCreate_box/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    box_name: boxName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('box created successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error creating category:', error);
+            });
+            location.reload();
+        }
+
+        // open category - Show cards
+        function openModal(boxName, categoryID) {
+            console.log(categoryID);
+            var modal = document.getElementById('myModal');
+            var modalContent = document.getElementById('modalContent');
+            modalContent.className = categoryID
+            modalContent.innerHTML = '<h2>' + boxName + '</h2>';
+            fetch('http://127.0.0.1:8000/cards/getOrCreate_card/?box_name=' + boxName)
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(data);
+                    data.forEach(cards => {
+                        var spanElement = document.createElement('span');
+                        spanElement.className = cards.id;
+                        spanElement.textContent = cards.question;
+                        spanElement.onclick = function () {
+                            openCardDetail(cards.id, categoryID, boxName); // تابع جدید برای نمایش جزئیات کارت
+                        };
+                        modalContent.appendChild(spanElement);
+                    })
+                })
+
+            modal.style.display = 'block';
+
+        }
+
+        // open card - show card detail
+        function openCardDetail(cardID, categoryID, boxName) {
+            var updatecardForm = document.getElementById('updatecardForm');
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
+            updatequestioncardinput.className =  categoryID
+            updateanswercardinput.className =  cardID
+            message.className = boxName
+
+            fetch('http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=' + categoryID + '&cardID=' + cardID)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data[0]);
+                updatequestioncardinput.value = data[0].question
+                updateanswercardinput.value = data[0].answer
+            })
+            updatecardForm.style.display = 'block';
+        }
+
+        // Update card
+        function updatecardsubmit(){
+            var updatecardForm = document.getElementById('updatecardForm')
+            var updatequestioncardinput = document.getElementById('updatequestioncardinput')
+            var updateanswercardinput = document.getElementById('updateanswercardinput')
+            var message = document.getElementById('message')
+
+            var categoryID = updatequestioncardinput.className
+            var cardID = updateanswercardinput.className
+
+            fetch(`http://127.0.0.1:8000/cards/getOrUpdateDetial_card/?categoryID=${categoryID}&cardID=${cardID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), // اگر از CSRF استفاده می‌کنید
+                },
+                body: JSON.stringify({
+                    question: updatequestioncardinput.value,
+                    answer : updateanswercardinput.value,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Card updated successfully:', data);
+                message.innerHTML = 'Card updated successfully';
+
+                // openModal(message.className, data.choice_category)
+
+            })
+            .catch(error => {
+                console.error('Error updating card:', error);
+                message.innerHTML = 'Error updating card';
+            });
+        }
+
+        // Open create card form
+        function openCreatecardForm(){
+            var createcardForm = document.getElementById('createcardForm');
+
+            createcardForm.style.display = 'block';
+        }
+
+
+        // Create card
+        function createcardsubmit(){
+            var questioncardinput = document.getElementById('questioncardinput').value;
+            var answercardinput = document.getElementById('answercardinput').value;
+            var modalContent = document.getElementById('modalContent').className;
+
+            console.log(modalContent);
+            fetch('http://127.0.0.1:8000/cards/getOrCreate_card/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    question: questioncardinput,
+                    answer: answercardinput,
+                    choice_category: modalContent
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('card created successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error creating category:', error);
+            });
+            location.reload();
+        }
+        
+    
+        function closeModal() {
+            var modal = document.getElementById('myModal');
+            var openCreateCategorydiv = document.getElementById('openCreateCategorydiv');
+    
+            modal.style.display = 'none';
+            openCreateCategorydiv.style.display = 'none';
+        }
+        function closechildModal() {
+            var createcardForm = document.getElementById('createcardForm');
+            var updatecardForm = document.getElementById('updatecardForm');
+            var message = document.getElementById('message')
+
+
+            createcardForm.style.display = 'none';
+            updatecardForm.style.display = 'none';
+            message.innerHTML = null;
+        }
+
+
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+{% endblock %}

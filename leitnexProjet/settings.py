@@ -24,6 +24,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts',
     'cards',
+    'boxes',
 
     'rest_framework',
 
