@@ -88,6 +88,9 @@
     color: rgb(73, 91, 47);
     z-index: 1;
 }
+#createcardForm div{
+    margin-top: 20px;
+}
 </style>
 {% endblock %}
 
@@ -195,13 +198,49 @@
             .then(data => {
                 data.forEach(category => {
                     console.log(category);
-                    showMYcard.innerHTML += '<span>' + category.category_name + '</span>';
+                    showMYcard.innerHTML += `<span onclick="addCategoryToBox(${category.id})">` + category.category_name + '</span>';
+        
+                    showMYcard.onclick = function(){}
                 })
 
             })
 
             divShowMyCards.style.display = 'block'
         }
+
+
+
+        function addCategoryToBox(categoryID){
+            var box_id = document.getElementById('modalContent').className;
+            console.log(categoryID);
+
+            fetch(`http://127.0.0.1:8000/boxes/addCategoryToCardsBox/?category_id=${categoryID}&box_id=${box_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), // اگر از CSRF استفاده می‌کنید
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Card updated successfully:', data);
+                message.innerHTML = 'Card updated successfully';
+
+                // openModal(message.className, data.choice_category)
+
+            })
+            .catch(error => {
+                console.error('Error updating card:', error);
+                message.innerHTML = 'Error updating card';
+            });
+        }
+        
 
 
         // open category - Show cards
