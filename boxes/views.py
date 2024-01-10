@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from boxes.serializers import BoxSerializer
+from cards.serializers import CardSerializer, CategorySerializer
 from boxes.models import Box, Partition, Section
+from cards.models import Category,Card
 from django.shortcuts import get_object_or_404
 
 # rest framework
@@ -48,3 +50,54 @@ def get_or_create_box(request):
             serializer.save()
             return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+@api_view(['GET','POST'])
+@permission_classes([IsAuthenticated])
+def get_or_create_cardbox(request):
+    auth_user = request.user
+    box_id = request.GET.get('box_id')
+
+    if request.method == 'GET':
+        Q_box = get_object_or_404(Box, user=auth_user, id=box_id)
+
+        print(Q_box.card_box)
+        serializer = CardSerializer(Q_box.card_box, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    if request.method == 'POST':
+        serializer = CardSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.validated_data['choice_user'] = auth_user
+
+            new_card = serializer.save()
+
+            add_to_box = Box.objects.get(id=box_id)
+            add_to_box.card_box.add(new_card)
+
+            serializer.save()
+            return Response({'message': 'Done', 'data':serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_category_to_cards_box(request):
+    auth_user = request.user
+
+    if request.method == 'POST':
+        category_id = request.GET.get('category_id')
+        box_id = request.GET.get('box_id')
+
+        box_instance = Box.objects.get(id=box_id, user=auth_user)
+        category_instance = Card.objects.filter(choice_category=category_id, choice_user=auth_user)
+        print(category_instance)
+
+        box_instance.card_box.add(*category_instance)
+
+
+    return Response({'message': 'Done'}, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
