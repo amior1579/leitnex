@@ -285,33 +285,33 @@
 
 
         // Create card
-        // function createcardsubmit(){
-        //     var questioncardinput = document.getElementById('questioncardinput').value;
-        //     var answercardinput = document.getElementById('answercardinput').value;
-        //     var modalContent = document.getElementById('modalContent').className;
+        function createcardsubmit(){
+            var questioncardinput = document.getElementById('questioncardinput').value;
+            var answercardinput = document.getElementById('answercardinput').value;
+            var modalContent = document.getElementById('modalContent').className;
 
-        //     console.log(modalContent);
-        //     fetch('http://127.0.0.1:8000/cards/getOrCreate_card/', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'X-CSRFToken': getCookie('csrftoken')
-        //         },
-        //         body: JSON.stringify({
-        //             question: questioncardinput,
-        //             answer: answercardinput,
-        //             choice_category: modalContent
-        //         })
-        //     })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         console.log('card created successfully:', data);
-        //     })
-        //     .catch(error => {
-        //         console.error('Error creating category:', error);
-        //     });
-        //     location.reload();
-        // }
+            console.log(modalContent);
+            fetch('http://127.0.0.1:8000/boxes/getOrCreate_cardbox/?box_id=' + modalContent, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    question: questioncardinput,
+                    answer: answercardinput,
+                    // choice_category: modalContent
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('card created successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error creating category:', error);
+            });
+            location.reload();
+        }
         
     
         function closeModal() {
