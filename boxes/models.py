@@ -17,6 +17,8 @@ class Section(models.Model):
             self.name = f'section-{self.pk}'
         super().save(*args, **kwargs)
 
+    # def get_queryset(self, user):
+    #     return self.choise_cards.filter(choice_user=user)
 
 class Partition(models.Model):
     name = models.CharField(max_length=100)
@@ -36,6 +38,8 @@ class Box(models.Model):
     user = models.ForeignKey(User,blank=True, null=True, on_delete=models.CASCADE)
     box_name = models.CharField(max_length=100, blank=False, null=False, verbose_name='box name')
     partitions = models.ManyToManyField(Partition,blank=True,default=None,verbose_name='partitions')
+    card_box = models.ManyToManyField(Card,blank=True,default=None,verbose_name='card box')
+    srart_time = models.DateField(blank=True,null=True, verbose_name='srart time')
 
     def __str__(self):
         return f'{self.id},{self.box_name}'

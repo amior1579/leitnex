@@ -8,6 +8,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CardSerializer(serializers.ModelSerializer):
+    choice_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False, )
+
     class Meta:
         model = Card
         fields = ('id','question','answer','image','choice_category','choice_user')
