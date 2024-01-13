@@ -108,12 +108,12 @@ def add_category_to_cards_box(request):
 
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def start_learning(request):
     auth_user = request.user
 
-    if request.method == 'POST':
+    if request.method == 'GET':
         box_id = request.GET.get('box_id')
         Q_box = Box.objects.get(id=box_id, user=auth_user)
         start_learn_time = Q_box.start_time
@@ -124,7 +124,7 @@ def start_learning(request):
             Q_box.save()
             print(Q_box)  
 
-        day_functions = [day_1]
+        day_functions = ["",day_1]
         learn_cards = day_functions[learn_days](Q_box)
 
         serializer = CardSerializer(learn_cards, many=True)

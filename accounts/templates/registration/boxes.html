@@ -45,8 +45,9 @@
 #modalContent span{
     border: 1px solid white;
     padding: 10px 30px 10px;
-    /* display: inline; */
-    margin: 5px;
+    display: inline;
+    background: rgb(84, 84, 84);
+    margin-top: 10px;
 }
 #shwo_cards_box span{
     border: 1px solid white;
@@ -124,7 +125,7 @@
                 <span class="add_card" onclick="openAddCard()">+</span>
                 <div id="modalContent" class=""></div>
 
-                <div><button>Start</button></div>
+                <div><button onclick="startLearning()">Start</button></div>
 
                 <!-- show and create card-->
                 <div id="createcardForm">
@@ -242,6 +243,87 @@
         }
         
 
+        function startLearning() {
+            var box_id = document.getElementById('modalContent').className;
+            var modalContent = document.getElementById('modalContent');
+            fetch('http://127.0.0.1:8000/boxes/startLearning/?box_id=' + box_id)
+                .then(response => response.json())
+                .then(data => {
+                    // console.log(data);
+                    data.forEach(cards => {
+                        var spanElement = document.createElement('span');
+                        spanElement.className = cards.id;
+                        spanElement.textContent = cards.question;
+
+                        spanElement.onclick = function () {
+                            showAnswe(cards.answer,cards.id, box_id);
+                        };
+
+                        modalContent.appendChild(spanElement);
+                    })
+                })
+        }
+
+        function showAnswe(answer, cards_id,box_id) {
+            console.log("hi");
+            var spanElement = document.getElementsByClassName(`${cards_id}`)[0];
+            spanElement.innerHTML = answer
+            var trueButton = document.createElement('button');
+            trueButton.textContent = 'True';
+            trueButton.onclick = function () {
+                handleGuess(cards_id, box_id, true); // افزودن cards به عنوان ورودی
+            };
+
+            var falseButton = document.createElement('button');
+            falseButton.textContent = 'False';
+            falseButton.onclick = function () {
+                handleGuess(cards_id, box_id, false); // افزودن cards به عنوان ورودی
+            };
+
+            spanElement.appendChild(trueButton);
+            spanElement.appendChild(falseButton);
+
+            // modalContent.appendChild(spanElement);
+        }
+
+        function handleGuess(cards_id, box_id, guess){
+            console.log("hereeee",cards_id, "-", box_id,"-",guess);
+            fetch(`http://127.0.0.1:8000/boxes/cardGuess/?box_id=${box_id}&card_id=${cards_id}&guess=${guess}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), 
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Card updated successfully:', data);
+                message.innerHTML = 'Card updated successfully';
+                console.log(guess);
+                var spans = document.getElementsByClassName(`${cards_id}`);
+                console.log(spans);
+                if (guess === 'true') {
+                    // for (var i = 0; i < spans.length; i++) {
+                    spans[0].style.backgroundColor = "red";
+                    }
+                // } else if (guess === 'false'){
+                //     for (var i = 0; i < spans.length; i++) {
+                //         spans[i].style.backgroundColor = "red";
+                //     }
+                // }
+
+            })
+            .catch(error => {
+                console.error('Error updating card:', error);
+                message.innerHTML = 'Error updating card';
+            });
+        }
 
         // open category - Show cards
         function openModal(boxName, categoryID) {
@@ -387,7 +469,6 @@
             modal.style.display = 'none';
             openCreateCategorydiv.style.display = 'none';
         }
-
         function closechildModal() {
             var createcardForm = document.getElementById('createcardForm');
             var updatecardForm = document.getElementById('updatecardForm');
