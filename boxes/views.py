@@ -4,6 +4,11 @@ from cards.serializers import CardSerializer, CategorySerializer
 from boxes.models import Box, Partition, Section
 from cards.models import Category,Card
 from django.shortcuts import get_object_or_404
+import django.utils.timezone
+from datetime import datetime 
+from boxes.learn_days import *
+from boxes.card_guess import *
+
 
 # rest framework
 from rest_framework.response import Response
@@ -100,4 +105,69 @@ def add_category_to_cards_box(request):
 
 
     return Response({'message': 'Done'}, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def start_learning(request):
+    auth_user = request.user
+
+    if request.method == 'GET':
+        box_id = request.GET.get('box_id')
+        Q_box = Box.objects.get(id=box_id, user=auth_user)
+        start_learn_time = Q_box.start_time
+        learn_days = Q_box.learn_days
+
+        if start_learn_time is None:
+            Q_box.start_time = datetime.now()
+            Q_box.save()
+            print(Q_box)  
+
+        day_functions = ["",day_1]
+        learn_cards = day_functions[learn_days](Q_box)
+
+        serializer = CardSerializer(learn_cards, many=True)
+
+
+        # print(learn_cards)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def card_guess(request):
+    auth_user = request.user
+
+    if request.method == 'POST':
+        box_id = request.GET.get('box_id')
+        card_id = request.GET.get('card_id')
+        guess = request.GET.get('guess')
+
+        Q_box = Box.objects.get(id=box_id, user=auth_user)
+        learn_days = Q_box.learn_days
+        # print(card_id)
+
+        desired_card = None
+        for card in Q_box.card_box.all():
+            # print(card)
+            if card.id == int(card_id):
+                desired_card = card
+                break
+
+        # print(desired_card)
+    
+
+        day_functions = ["",guess_day_1]
+        card_guess = day_functions[learn_days](Q_box,desired_card,guess)
+
+    # return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'message': 'Done'}, status=status.HTTP_201_CREATED)
+
+
+
+
+
+

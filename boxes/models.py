@@ -39,7 +39,8 @@ class Box(models.Model):
     box_name = models.CharField(max_length=100, blank=False, null=False, verbose_name='box name')
     partitions = models.ManyToManyField(Partition,blank=True,default=None,verbose_name='partitions')
     card_box = models.ManyToManyField(Card,blank=True,default=None,verbose_name='card box')
-    srart_time = models.DateField(blank=True,null=True, verbose_name='srart time')
+    start_time = models.DateField(blank=True,null=True, verbose_name='start time')
+    learn_days = models.IntegerField(blank=True,null=True, verbose_name='learn_days')
 
     def __str__(self):
         return f'{self.id},{self.box_name}'
