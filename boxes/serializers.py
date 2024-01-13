@@ -4,5 +4,5 @@ from boxes.models import Box
 class BoxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Box
-        fields = ('id','user','box_name','partitions','card_box','srart_time')
+        fields = ('id','user','box_name','partitions','card_box','start_time')
 
